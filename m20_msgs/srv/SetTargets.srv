@@ -1,0 +1,7 @@
+# 设置检测目标
+# 请求：客户端希望检测的目标类别列表（如 ["person", "helmet"]）
+string[] targets
+---
+# 响应
+bool success          # 目标是否设置成功
+string message        # 结果说明

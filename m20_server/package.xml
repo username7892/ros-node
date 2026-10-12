@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>m20_server</name>
+  <version>0.1.0</version>
+  <description>M20 server node: provides SetTargets service to receive detection targets from client, replies, then broadcasts targets on a reliable topic for the yolo node.</description>
+
+  <maintainer email="wxh@todo.todo">wxh</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>m20_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>m20_msgs</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>m20_msgs</exec_depend>
+
+  <export>
+  </export>
+</package>
