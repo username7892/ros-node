@@ -1,0 +1,34 @@
+<launch>
+  <!-- M20 目标检测完整链路
+       视频节点(C++/GStreamer+NVDEC) - yolo节点(Python/YOLOE)
+       client(C++) 通过 Service 到 server(C++)，再经 reliable Topic 到 yolo
+  -->
+
+  <!-- 视频节点：RTSP 拉流 + NVDEC 硬解，发布 /m20/image_raw -->
+  <!-- 摄像头正式地址: rtsp://192.168.1.65:554/0-0 -->
+  <node pkg="m20_camera" type="video_node" name="m20_video_node" output="screen">
+    <param name="rtsp_url" value="rtsp://m20-detector:f715e51840a1359d569bbb9a42af402e@120.26.18.138:8554/camera-front"/>
+    <param name="topic"    value="/m20/image_raw"/>
+    <param name="width"    value="800"/>
+    <param name="height"   value="600"/>
+  </node>
+
+  <!-- server 节点：Service 收目标 + reliable Topic 广播 -->
+  <node pkg="m20_server" type="server_node" name="m20_server_node" output="screen">
+    <param name="service"       value="/m20/set_targets"/>
+    <param name="targets_topic" value="/m20/detect_targets"/>
+  </node>
+
+  <!-- yolo 节点：订阅图+目标，YOLOE 推理，10Hz 输出识别流 -->
+  <node pkg="m20_yolo" type="yolo_node.py" name="m20_yolo_node" output="screen">
+    <param name="input_topic"   value="/m20/image_raw"/>
+    <param name="targets_topic" value="/m20/detect_targets"/>
+    <param name="output_topic"  value="/m20/image_detected"/>
+    <param name="model"         value="yoloe-v8m-seg.pt"/>
+    <param name="output_fps"    value="10"/>
+  </node>
+
+  <!-- client 节点：发送检测目标（启动时发一次）-->
+  <node pkg="m20_client" type="client_node" name="m20_client_node" output="screen"
+        args="person helmet"/>
+</launch>

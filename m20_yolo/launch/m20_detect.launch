@@ -20,12 +20,25 @@
   </node>
 
   <!-- yolo 节点：订阅图+目标，YOLOE 推理，10Hz 输出识别流 -->
-  <node pkg="m20_yolo" type="yolo_node.py" name="m20_yolo_node" output="screen">
+  <node pkg="m20_yolo" type="yolo_node.py" name="m20_yolo_node" output="screen"
+        launch-prefix="/home/wxh/venv/dog_det/bin/python">
     <param name="input_topic"   value="/m20/image_raw"/>
     <param name="targets_topic" value="/m20/detect_targets"/>
     <param name="output_topic"  value="/m20/image_detected"/>
     <param name="model"         value="/home/wxh/dog_web/python_yoloe/yoloe-v8m-seg.pt"/>
     <param name="output_fps"    value="10"/>
+    <param name="box_json_path" value="/tmp/m20_box.json"/>
+  </node>
+
+  <!-- stream 节点：把 /m20/image_detected 转成 RTSP 视频流 -->
+  <node pkg="m20_yolo" type="stream_node.py" name="m20_stream_node" output="screen">
+    <param name="input_topic" value="/m20/image_detected"/>
+    <param name="host"        value="10.21.34.107"/>
+    <param name="port"        value="5000"/>
+    <param name="bitrate"     value="4000000"/>
+    <param name="fps"         value="10"/>
+    <param name="width"       value="1280"/>
+    <param name="height"      value="720"/>
   </node>
 
   <!-- client 节点：发送检测目标（启动时发一次）-->
