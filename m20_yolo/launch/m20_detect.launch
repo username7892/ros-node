@@ -1,47 +1,33 @@
+<?xml version="1.0"?>
 <launch>
-  <!-- M20 目标检测完整链路
-       视频节点(C++/GStreamer+NVDEC) - yolo节点(Python/YOLOE)
-       client(C++) 通过 Service 到 server(C++)，再经 reliable Topic 到 yolo
-  -->
+  <!-- M20 检测链路: 视频(拉流+硬解) / YOLOE 推理 / 推流(H264 RTSP 给 MediaMTX 转 WebRTC)
+       参数按节点拆分在 config/*.yaml, 每个文件内容直接就是该节点的私有参数。 -->
 
-  <!-- 视频节点：RTSP 拉流 + NVDEC 硬解，发布 /m20/image_raw -->
-  <!-- 摄像头正式地址: rtsp://192.168.1.65:554/0-0 -->
+  <arg name="cfg_dir" default="$(find m20_yolo)/config"/>
+
+  <!-- 视频节点: RTSP 拉流 + NVDEC 硬解 -->
   <node pkg="m20_camera" type="video_node" name="m20_video_node" output="screen">
-    <param name="rtsp_url" value="rtsp://192.168.1.65:554/0-1"/>
-    <param name="topic"    value="/m20/image_raw"/>
-    <param name="width"    value="800"/>
-    <param name="height"   value="600"/>
+    <rosparam file="$(arg cfg_dir)/video_node.yaml" command="load"/>
   </node>
 
-  <!-- server 节点：Service 收目标 + reliable Topic 广播 -->
+  <!-- server: Service 收目标 + Topic 广播 -->
   <node pkg="m20_server" type="server_node" name="m20_server_node" output="screen">
-    <param name="service"       value="/m20/set_targets"/>
-    <param name="targets_topic" value="/m20/detect_targets"/>
+    <rosparam file="$(arg cfg_dir)/server_node.yaml" command="load"/>
   </node>
 
-  <!-- yolo 节点：订阅图+目标，YOLOE 推理，10Hz 输出识别流 -->
+  <!-- yolo: YOLOE 推理, 固定帧率输出 -->
   <node pkg="m20_yolo" type="yolo_node.py" name="m20_yolo_node" output="screen"
         launch-prefix="/home/wxh/venv/dog_det/bin/python">
-    <param name="input_topic"   value="/m20/image_raw"/>
-    <param name="targets_topic" value="/m20/detect_targets"/>
-    <param name="output_topic"  value="/m20/image_detected"/>
-    <param name="model"         value="/home/wxh/dog_web/python_yoloe/yoloe-v8m-seg.pt"/>
-    <param name="output_fps"    value="10"/>
-    <param name="box_json_path" value="/tmp/m20_box.json"/>
+    <rosparam file="$(arg cfg_dir)/yolo_node.yaml" command="load"/>
   </node>
 
-  <!-- stream 节点：把 /m20/image_detected 转成 RTSP 视频流 -->
+  <!-- stream: 画框结果编码 H264 推给 MediaMTX -->
   <node pkg="m20_yolo" type="stream_node.py" name="m20_stream_node" output="screen">
-    <param name="input_topic" value="/m20/image_detected"/>
-    <param name="host"        value="10.21.34.107"/>
-    <param name="port"        value="5000"/>
-    <param name="bitrate"     value="4000000"/>
-    <param name="fps"         value="10"/>
-    <param name="width"       value="1280"/>
-    <param name="height"      value="720"/>
+    <rosparam file="$(arg cfg_dir)/stream_node.yaml" command="load"/>
   </node>
 
-  <!-- client 节点：发送检测目标（启动时发一次）-->
-  <node pkg="m20_client" type="client_node" name="m20_client_node" output="screen"
-        args="person helmet"/>
+  <!-- client: 启动时下发一次检测目标 -->
+  <node pkg="m20_client" type="client_node" name="m20_client_node" output="screen">
+    <rosparam file="$(arg cfg_dir)/client_node.yaml" command="load"/>
+  </node>
 </launch>

@@ -1,0 +1,12 @@
+# 推理节点 (m20_yolo/yolo_node.py)
+input_topic: "/m20/image_raw"
+targets_topic: "/m20/detect_targets"
+output_topic: "/m20/image_detected"
+model: "/home/wxh/dog_web/python_yoloe/yoloe-v8m-seg.pt"
+device: "cuda:0"
+conf: 0.25
+output_fps: 10
+# box.json 写 SMB 共享; 目标机无挂载时自动回退到 fallback
+box_enable: false
+box_json_path: "/tmp/m20_box.json"
+box_json_fallback: "/tmp/m20_box.json"

@@ -36,13 +36,16 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> targets;
 
-    // 优先用命令行参数
-    if (argc > 1) {
-        for (int i = 1; i < argc; ++i) targets.push_back(argv[i]);
-    } else {
+    // 参数优先: ~targets 由 launch/params.yaml 提供(逗号分隔)
+    // 命令行参数仍保留, 用于 rosrun 临时覆盖
+    if (pnh.hasParam("targets")) {
         std::string s;
         pnh.param<std::string>("targets", s, "person,helmet");
         targets = splitTokens(s, ',');
+    } else if (argc > 1) {
+        for (int i = 1; i < argc; ++i) targets.push_back(argv[i]);
+    } else {
+        targets = splitTokens("person,helmet", ',');
     }
 
     std::string srv_name;

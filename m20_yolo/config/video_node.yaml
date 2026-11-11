@@ -1,0 +1,11 @@
+# 视频输入节点 (m20_camera/video_node)
+# 上游: 172.20.21.2 上 MediaMTX 的 RTSP 端口(8555)
+rtsp_url: "rtsp://172.20.21.2:8555/camera-front"
+topic: "/m20/image_raw"
+frame_id: "m20_camera"
+# 仅日志/占位, 实际分辨率由上游码流决定(实测 800x600 15fps)
+width: 800
+height: 600
+# GStreamer rtspsrc 参数
+latency_ms: 0
+protocols: "tcp"

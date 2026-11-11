@@ -1,0 +1,26 @@
+# 推流节点 (m20_yolo/stream_node.py)
+input_topic: "/m20/image_detected"
+
+# 输出模式:
+#   rtsp = 推 RTSP 给 MediaMTX(需 gstreamer1.0-rtsp)  <- 当前使用
+#   udp  = MPEG-TS over UDP, 无握手, 仅稳定局域网
+#
+# MediaMTX 侧(172.20.21.2 实测):
+#   rtspAddress :8555 (仅 tcp) | webrtcAddress :8889
+#   已有路径 camera-front / camera-rear / camera-front-detected / camera-rear-detected
+mode: "rtsp"
+
+# rtsp 模式
+rtsp_url: "rtsp://172.20.21.2:8555/camera-front-detected"
+rtsp_transport: "tcp"
+
+# udp 模式(备用)
+host: "172.20.21.2"
+port: 5000
+
+# 编码尺寸必须与 /m20/image_detected 实际分辨率一致(实测 800x600),
+# 不一致时 appsrc 按声明尺寸解析真实数据, 会输出全黑帧
+width: 800
+height: 600
+fps: 10
+bitrate: 4000000

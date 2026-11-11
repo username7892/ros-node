@@ -1,0 +1,3 @@
+# 目标广播 (m20_server)
+service: "/m20/set_targets"
+targets_topic: "/m20/detect_targets"

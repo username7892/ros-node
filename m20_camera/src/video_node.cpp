@@ -31,17 +31,20 @@ public:
     VideoNode(ros::NodeHandle& nh, ros::NodeHandle& pnh)
         : nh_(nh), pnh_(pnh) {
         pnh_.param<std::string>("rtsp_url", rtsp_url_,
-            "rtsp://192.168.1.65:554/0-1");
+            "rtsp://172.20.21.2:8555/camera-front");
         pnh_.param<std::string>("topic", topic_, "/m20/image_raw");
         pnh_.param<std::string>("frame_id", frame_id_, "m20_camera");
         pnh_.param<int>("width", width_, 800);
         pnh_.param<int>("height", height_, 600);
+        pnh_.param<int>("latency_ms", latency_ms_, 0);
+        pnh_.param<std::string>("protocols", protocols_, "tcp");
 
         pub_ = nh_.advertise<sensor_msgs::Image>(topic_, 1);
 
         // 组装 GStreamer 管道（与验证通过的 gst-launch 一致）
         std::string pipeline =
-            "rtspsrc location=\"" + rtsp_url_ + "\" protocols=tcp latency=0 ! "
+            "rtspsrc location=\"" + rtsp_url_ + "\" protocols=" + protocols_ +
+            " latency=" + std::to_string(latency_ms_) + " ! "
             "rtph264depay ! h264parse ! "
             "nvv4l2decoder ! "
             "nvvidconv ! video/x-raw,format=BGRx ! "
@@ -118,6 +121,8 @@ private:
     GstElement* sink_ = nullptr;
     std::string rtsp_url_, topic_, frame_id_;
     int width_ = 800, height_ = 600;
+    int latency_ms_ = 0;
+    std::string protocols_ = "tcp";
     bool caps_logged_ = false;
 };
 

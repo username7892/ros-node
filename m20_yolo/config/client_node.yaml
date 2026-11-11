@@ -1,0 +1,3 @@
+# 启动时下发的初始检测目标 (m20_client)
+# 多个目标用英文逗号分隔, 不要用空格
+targets: "person,helmet"
